@@ -1,0 +1,237 @@
+{
+  "支线33": {
+    "description": "基础副本",
+    "steps": [
+      {
+        "type": "enter",
+        "actions": [
+          {
+            "action": "click",
+            "image": 1,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 2,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 3,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 4,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 5,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 6,
+            "wait": 2
+          }
+        ]
+      },
+      {
+        "type": "battle",
+        "check": {
+          "image": 7,
+          "interval": 5
+        },
+        "actions": [
+          {
+            "action": "click",
+            "image": 7,
+            "wait": 1
+          },
+          {
+            "action": "click",
+            "image": 8,
+            "wait": 1
+          }
+        ]
+      },
+      {
+        "type": "end",
+        "actions": [
+          {
+            "action": "click",
+            "image": 9,
+            "wait": 1
+          },
+          {
+            "action": "click",
+            "image": 10,
+            "wait": 1
+          }
+        ]
+      },
+      {
+        "type": "restart",
+        "actions": [
+          {
+            "action": "click",
+            "image": 11,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 5,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 6,
+            "wait": 3
+          }
+        ]
+      },
+      {
+        "type": "energy",
+        "check": {
+          "image": 12
+        },
+        "actions": [
+          {
+            "action": "handle_energy"
+          }
+        ]
+      }
+    ]
+  },
+  "龙13": {
+    "description": "龙13副本",
+    "steps": [
+      {
+        "type": "enter",
+        "actions": [
+          {
+            "action": "click",
+            "image": 13,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 14,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 15,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 17,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 6,
+            "wait": 2
+          }
+        ]
+      },
+      {
+        "type": "battle",
+        "check": {
+          "images": [
+            {
+              "image": 16,
+              "type": "victory",
+              "wait_after_check": 2
+            },
+            {
+              "image": 11,
+              "type": "defeat",
+              "wait_after_check": 2
+            }
+          ],
+          "interval": 5
+        },
+        "actions": {
+          "victory": [
+            {
+              "action": "click",
+              "image": 16,
+              "wait": 2
+            },
+            {
+              "action": "click",
+              "image": 8,
+              "wait": 1
+            }
+          ],
+          "defeat": [
+            {
+              "action": "click",
+              "image": 11,
+              "wait": 2
+            },
+            {
+              "action": "click",
+              "image": 17,
+              "wait": 2
+            },
+            {
+              "action": "click",
+              "image": 6,
+              "wait": 2
+            }
+          ]
+        }
+      },
+      {
+        "type": "end",
+        "actions": [
+          {
+            "action": "click",
+            "image": 9,
+            "wait": 1
+          },
+          {
+            "action": "click",
+            "image": 10,
+            "wait": 1
+          }
+        ]
+      },
+      {
+        "type": "restart",
+        "actions": [
+          {
+            "action": "click",
+            "image": 11,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 17,
+            "wait": 2
+          },
+          {
+            "action": "click",
+            "image": 6,
+            "wait": 3
+          }
+        ]
+      },
+      {
+        "type": "energy",
+        "check": {
+          "image": 12
+        },
+        "actions": [
+          {
+            "action": "handle_energy"
+          }
+        ]
+      }
+    ]
+  }
+}
