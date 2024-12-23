@@ -234,12 +234,15 @@ class AutoGameGUI:
             return
         
         try:
+            # 获取ADB完整路径
+            adb_path = self.get_adb_path()
             # 获取选择的端口
             selected_port = self.port_options[self.port_var.get()]
             
             # 创建游戏控制器
             self.game = GameAutomation()
-            # 设置模拟器端口
+            # 设置ADB路径和模拟器端口
+            self.game.controller.adb_path = adb_path  # 确保GameAutomation类支持设置adb_path
             self.game.controller.mumu_port = selected_port
             self.game.max_energy_purchase = energy_limit
             
@@ -504,45 +507,17 @@ class AutoGameGUI:
             messagebox.showerror("错误", f"保存配置文件失败：{e}")
 
     def use_builtin_adb(self, silent=False):
-        """使用内置的 ADB
-        Args:
-            silent: 是否静默模式，不显示消息框
-        """
+        """使用内置的ADB"""
         try:
-            # 获取当前目录下的adb文件夹
-            builtin_adb_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "adb")
-            if hasattr(sys, '_MEIPASS'):  # 如果是打包后的程序
-                builtin_adb_dir = os.path.join(sys._MEIPASS, "adb")
-                
-            adb_exe_path = os.path.join(builtin_adb_dir, "adb.exe")
-            
-            if not os.path.exists(adb_exe_path):
-                if not silent:
-                    messagebox.showerror("错误", "未找到内置的 ADB 文件，请确保 adb 文件夹包含所需文件")
-                return False
-                
-            # 检查必要的文件是否存在
-            required_files = ["AdbWinApi.dll", "AdbWinUsbApi.dll"]
-            missing_files = [f for f in required_files 
-                            if not os.path.exists(os.path.join(builtin_adb_dir, f))]
-            
-            if missing_files:
-                if not silent:
-                    messagebox.showerror("错误", f"缺少以下文件：\n{', '.join(missing_files)}")
-                return False
-                
-            # 使用内置 ADB 的路径
-            self.adb_path = adb_exe_path
-            if hasattr(self, 'adb_path_var'):
-                self.adb_path_var.set(self.adb_path)  # 更新显示
-            self.save_adb_path(self.adb_path)
+            self.adb_path = "adb/adb.exe"
+            self.adb_path_var.set(self.adb_path)
+            self.save_config()
             if not silent:
-                messagebox.showinfo("成功", "已配置为内置ADB")
+                messagebox.showinfo("成功", "已配置内置ADB")
             return True
-            
         except Exception as e:
             if not silent:
-                messagebox.showerror("错误", f"配置内置 ADB 失败：{e}")
+                messagebox.showerror("错误", f"使用内置ADB失败: {str(e)}")
             return False
 
     def show_adb_config_dialog(self):
@@ -663,11 +638,13 @@ class AutoGameGUI:
             return
         
         try:
+            # 获取ADB完整路径
+            adb_path = self.get_adb_path()
             # 获取选择的端口
             selected_port = self.port_options[self.port_var.get()]
             
             # 先列出所有连接的设备
-            cmd = f"{self.adb_path} devices"
+            cmd = f'"{adb_path}" devices'  # 添加引号避免路径空格问题
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
             devices = result.stdout.strip().split('\n')[1:]  # 跳过第一行
             
@@ -682,7 +659,7 @@ class AutoGameGUI:
                         port = device_id.split(':')[1]
                         # 尝试获取设备信息
                         try:
-                            info_cmd = f"{self.adb_path} -s {device_id} shell getprop ro.product.model"
+                            info_cmd = f"{adb_path} -s {device_id} shell getprop ro.product.model"
                             info = subprocess.run(info_cmd, shell=True, capture_output=True, text=True)
                             model = info.stdout.strip() or "未知设备"
                             device_info += f"端口 {port}: {model}\n"
@@ -704,7 +681,7 @@ class AutoGameGUI:
             messagebox.showinfo("模拟器状态", device_info)
             
             # 尝试连接选择的端口
-            cmd = f"{self.adb_path} connect 127.0.0.1:{selected_port}"
+            cmd = f'"{adb_path}" connect 127.0.0.1:{selected_port}'
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
             
             if "connected" in result.stdout.lower():
@@ -718,19 +695,15 @@ class AutoGameGUI:
     def load_config(self):
         """加载配置"""
         try:
-            config_dir = os.path.expanduser("~/.e7auto")
-            if not os.path.exists(config_dir):
-                os.makedirs(config_dir)
-            config_file = os.path.join(config_dir, "config.json")
-            
+            config_file = "config.json"
             if os.path.exists(config_file):
                 with open(config_file, 'r') as f:
                     config = json.load(f)
-                    self.adb_path = config.get("adb_path")
+                    # 始终使用相对路径
+                    self.adb_path = "adb/adb.exe"
                     # 加载选择的模拟器端口
                     saved_port = config.get("emulator_port")
                     if saved_port:
-                        # 根据保存的端口找到对应的模拟器名称
                         for name, port in self.port_options.items():
                             if port == saved_port:
                                 self.selected_emulator = name
@@ -738,22 +711,21 @@ class AutoGameGUI:
                     else:
                         self.selected_emulator = "MuMu模拟器(7555)"
             else:
-                self.adb_path = None
+                # 默认使用相对路径
+                self.adb_path = "adb/adb.exe"
                 self.selected_emulator = "MuMu模拟器(7555)"
+                # 保存默认配置
+                self.save_config()
         except:
-            self.adb_path = None
+            self.adb_path = "adb/adb.exe"
             self.selected_emulator = "MuMu模拟器(7555)"
 
     def save_config(self):
         """保存配置"""
         try:
-            config_dir = os.path.expanduser("~/.e7auto")
-            if not os.path.exists(config_dir):
-                os.makedirs(config_dir)
-            config_file = os.path.join(config_dir, "config.json")
-            
+            config_file = "config.json"
             config = {
-                "adb_path": self.adb_path,
+                "adb_path": "adb/adb.exe",  # 始终保存相对路径
                 "emulator_port": self.port_options[self.port_var.get()]
             }
             
@@ -777,6 +749,13 @@ class AutoGameGUI:
         except Exception as e:
             print(f"关闭时出错: {e}")
             self.root.destroy()
+
+    def get_adb_path(self):
+        """获取ADB的完整路径"""
+        if self.adb_path == "adb/adb.exe":
+            # 如果是相对路径，转换为完整路径
+            return os.path.abspath(self.adb_path)
+        return self.adb_path
 
 class StageConfigDialog:
     """副本配置对话框"""
